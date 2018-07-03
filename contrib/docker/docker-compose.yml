@@ -1,90 +1,73 @@
 # docker-compose build && docker-compose up -d
 # If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
-version: "3.6"
+version: "3"
+
+volumes:
+  ckan_config:
+  ckan_home:
+  ckan_storage:
+  ckan_pg_data:
 
 services:
   ckan:
-    container_name: ${COMPOSE_PROJECT_NAME}-ckan
+    container_name: ckan
     build:
       context: ../../
       args:
           - CKAN_SITE_URL=${CKAN_SITE_URL}
-    links: 
-      - ckan-db
-      - ckan-solr
-      - ckan-redis
+    links:
+      - ckan_db
+      - ckan_solr
+      - ckan_redis
     ports:
-      - "0.0.0.0:${CKAN_PORT:-5000}:5000"
+      - "0.0.0.0:${CKAN_PORT}:5000"
     environment:
-        #Defaults work with linked containers, change to use own Postgres, SolR, Redis or Datapusher
-        CKAN_SQLALCHEMY_URL: "postgresql://ckan:${POSTGRES_PASSWORD}@ckan-db/ckan"
-        CKAN_DATASTORE_WRITE_URL: "postgresql://ckan:${POSTGRES_PASSWORD}@ckan-db/datastore"
-        CKAN_DATASTORE_READ_URL: "postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@ckan-db/datastore"
-        CKAN_SOLR_URL: "http://ckan-solr:8983/solr/ckan"
-        CKAN_REDIS_URL: "redis://ckan-redis:6379/1"
-        CKAN_DATAPUSHER_URL: "http://ckan-datapusher:8800"
-        CKAN_SITE_URL: ${CKAN_SITE_URL}
-        CKAN_MAX_UPLOAD_SIZE_MB: ${CKAN_MAX_UPLOAD_SIZE_MB}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        DS_RO_PASS: ${DATASTORE_READONLY_PASSWORD}
-        # letsencrypt-nginx-proxy-companion Host  
-        VIRTUAL_PORT: ${CKAN_PORT:-5000}
-        VIRTUAL_HOST: ${VIRTUAL_HOST}
-        LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
-        LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-    restart: always  
-    volumes:
-      - config:/etc/ckan
-      - home:/usr/lib/ckan
-      - storage:/var/lib/ckan
+      # Defaults work with linked containers, change to use own Postgres, SolR, Redis or Datapusher
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@ckan_db/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@ckan_db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@ckan_db/datastore
+      - CKAN_SOLR_URL=http://ckan_solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://ckan_redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://ckan_datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
 
-  ckan-datapusher:
-    container_name: ${COMPOSE_PROJECT_NAME}-datapusher
+    volumes:
+      - ckan_config:/etc/ckan
+      - ckan_home:/usr/lib/ckan
+      - ckan_storage:/var/lib/ckan
+
+  datapusher:
+    container_name: datapusher
     image: clementmouchet/datapusher
-    restart: always
     ports:
       - "8800:8800"
-    
-  ckan-db:
-    container_name: ${COMPOSE_PROJECT_NAME}-postgis
+
+  ckan_db:
+    container_name: ckan_db
     build:
       context: ../../
       dockerfile: contrib/docker/postgresql/Dockerfile
       args:
         - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    #ports:
-    #  - "0.0.0.0:${POSTGRES_PORT:-5432}:5432"
+    ports:
+      - "0.0.0.0:54320:5432"
     environment:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    restart: always
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - ckan_pg_data:/var/lib/postgresql/data
 
-  ckan-solr:
-    container_name: ${COMPOSE_PROJECT_NAME}-solr
+  ckan_solr:
+    container_name: ckan_solr
     build:
       context: ../../
       dockerfile: contrib/docker/solr/Dockerfile
-    restart: always
 
-  ckan-redis:
-    container_name: ${COMPOSE_PROJECT_NAME}-redis
+
+  ckan_redis:
+    container_name: ckan_redis
     image: redis:latest
-    restart: always
-    
-volumes:
-  config:
-    name: ${COMPOSE_PROJECT_NAME}_config
-  home:    
-    name: ${COMPOSE_PROJECT_NAME}_home
-  storage:
-    name: ${COMPOSE_PROJECT_NAME}_storage
-  pg-data:
-    name: ${COMPOSE_PROJECT_NAME}_pg-data
-    
-networks:
-  default:
-    external:
-      name: ${NETWORK:-clarity}
