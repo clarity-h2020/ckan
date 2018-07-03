@@ -46,3 +46,10 @@ node_modules/
 
 # docker
 contrib/docker/.env
+
+# netbeans
+/nbproject/private/
+/desktop.ini
+/icon.ico
+*.pid
+*.out
