@@ -23,7 +23,6 @@ tmp/*
 solr_runtime/*
 fl_notes.txt
 *.ini
-!ckan/migration/alembic.ini
 .noseids
 *~
 .idea
@@ -46,7 +45,6 @@ node_modules/
 
 # docker
 contrib/docker/.env
-contrib/docker/data
 
 # netbeans
 /nbproject/private/
