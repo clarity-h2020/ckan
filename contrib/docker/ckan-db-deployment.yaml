@@ -23,7 +23,7 @@ spec:
         - name: DS_RO_PASS
         - name: POSTGRES_PASSWORD
         image: ckan-db
-        name: ckan_db
+        name: ckan-db
         ports:
         - containerPort: 5432
         resources: {}
