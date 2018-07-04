@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - image: redis:latest
-        name: ckan_redis
+        name: ckan-redis
         resources: {}
       restartPolicy: Always
 status: {}

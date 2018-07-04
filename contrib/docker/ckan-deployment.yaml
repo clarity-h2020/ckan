@@ -21,19 +21,19 @@ spec:
       containers:
       - env:
         - name: CKAN_DATAPUSHER_URL
-          value: http://ckan_datapusher:8800
+          value: http://ckan-datapusher:8800
         - name: CKAN_DATASTORE_READ_URL
           value: postgresql://datastore_ro:@ckan_db/datastore
         - name: CKAN_DATASTORE_WRITE_URL
           value: postgresql://ckan:@ckan_db/datastore
         - name: CKAN_MAX_UPLOAD_SIZE_MB
         - name: CKAN_REDIS_URL
-          value: redis://ckan_redis:6379/1
+          value: redis://ckan-redis:6379/1
         - name: CKAN_SITE_URL
         - name: CKAN_SOLR_URL
           value: http://ckan_solr:8983/solr/ckan
         - name: CKAN_SQLALCHEMY_URL
-          value: postgresql://ckan:@ckan_db/ckan
+          value: postgresql://ckan:@ckan-db/ckan
         - name: DS_RO_PASS
         - name: POSTGRES_PASSWORD
         image: ckan
