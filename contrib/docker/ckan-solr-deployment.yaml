@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - image: ckan-solr
-        name: ckan_solr
+        name: ckan-solr
         resources: {}
       restartPolicy: Always
 status: {}

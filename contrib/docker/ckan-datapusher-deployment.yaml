@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - image: clementmouchet/datapusher
-        name: ckan_datapusher
+        name: ckan-datapusher
         ports:
         - containerPort: 8800
         resources: {}
