@@ -6,16 +6,16 @@ volumes:
   ckan-config:
   ckan-home:
   ckan-storage:
-  ckan-pg_data:
+  ckan-pg-data:
 
 services:
-  ckan:
-    container_name: ckan
+  ckan.csis.clarity-h2020.eu:
+    container_name: ckan.csis.clarity-h2020.eu
     build:
       context: ../../
       args:
           - CKAN_SITE_URL=${CKAN_SITE_URL}
-    links:
+    links: 
       - ckan-db
       - ckan-solr
       - ckan-redis
@@ -33,7 +33,12 @@ services:
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-
+      # letsencrypt-nginx-proxy-companion Host  
+      - VIRTUAL_PORT:${CKAN_PORT}:5000
+      - VIRTUAL_HOST:${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST:${LETSENCRYPT_HOST}
+      - LETSENCRYPT_EMAIL:${LETSENCRYPT_EMAIL}
+    restart: always  
     volumes:
       - ckan-config:/etc/ckan
       - ckan-home:/usr/lib/ckan
@@ -42,11 +47,12 @@ services:
   ckan-datapusher:
     container_name: ckan-datapusher
     image: clementmouchet/datapusher
+    restart: always
     ports:
       - "8800:8800"
 
   ckan-db:
-    container-name: ckan-db
+    container_name: ckan-db
     build:
       context: ../../
       dockerfile: contrib/docker/postgresql/Dockerfile
@@ -58,6 +64,7 @@ services:
     environment:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
     volumes:
       - ckan-pg-data:/var/lib/postgresql/data
 
@@ -66,8 +73,14 @@ services:
     build:
       context: ../../
       dockerfile: contrib/docker/solr/Dockerfile
-
+    restart: always
 
   ckan-redis:
     container_name: ckan-redis
     image: redis:latest
+    restart: always
+    
+networks:
+  default:
+    external:
+      name: ${NETWORK:-webproxy}
