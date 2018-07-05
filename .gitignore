@@ -45,6 +45,7 @@ node_modules/
 
 # docker
 contrib/docker/.env
+contrib/docker/data
 
 # netbeans
 /nbproject/private/
