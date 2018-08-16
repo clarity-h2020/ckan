@@ -2,15 +2,9 @@
 # If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
 version: "3"
 
-volumes:
-  ckan-config:
-  ckan-home:
-  ckan-storage:
-  ckan-pg-data:
-
 services:
-  ckan.csis.clarity-h2020.eu:
-    container_name: ckan.csis.clarity-h2020.eu
+  ckan:
+    container_name: ${COMPOSE_PROJECT_NAME}-ckan
     build:
       context: ../../
       args:
@@ -40,47 +34,53 @@ services:
         LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     restart: always  
     volumes:
-      - ckan-config:/etc/ckan
-      - ckan-home:/usr/lib/ckan
-      - ckan-storage:/var/lib/ckan
+      - ${COMPOSE_PROJECT_NAME}_config:/etc/ckan
+      - ${COMPOSE_PROJECT_NAME}_home:/usr/lib/ckan
+      - ${COMPOSE_PROJECT_NAME}_storage:/var/lib/ckan
 
   ckan-datapusher:
-    container_name: ckan-datapusher
+    container_name: ${COMPOSE_PROJECT_NAME}-datapusher
     image: clementmouchet/datapusher
     restart: always
     ports:
       - "8800:8800"
     
   ckan-db:
-    container_name: ckan-db
+    container_name: ${COMPOSE_PROJECT_NAME}-db
     build:
       context: ../../
       dockerfile: contrib/docker/postgresql/Dockerfile
       args:
         - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "0.0.0.0:${POSTGRES_PORT:-5432}:5432"
+    #ports:
+    #  - "0.0.0.0:${POSTGRES_PORT:-5432}:5432"
     environment:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     restart: always
     volumes:
-      - ckan-pg-data:/var/lib/postgresql/data
+      - ${COMPOSE_PROJECT_NAME}_pg-data:/var/lib/postgresql/data
 
   ckan-solr:
-    container_name: ckan-solr
+    container_name: ${COMPOSE_PROJECT_NAME}-solr
     build:
       context: ../../
       dockerfile: contrib/docker/solr/Dockerfile
     restart: always
 
   ckan-redis:
-    container_name: ckan-redis
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
     image: redis:latest
     restart: always
+    
+volumes:
+  ${COMPOSE_PROJECT_NAME}_config:
+  ${COMPOSE_PROJECT_NAME}_home:
+  ${COMPOSE_PROJECT_NAME}_storage:
+  ${COMPOSE_PROJECT_NAME}_pg-data:
     
 networks:
   default:
     external:
-      name: ${NETWORK:-webproxy}
+      name: ${NETWORK:-clarity}
