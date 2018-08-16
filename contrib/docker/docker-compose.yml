@@ -34,9 +34,9 @@ services:
         LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     restart: always  
     volumes:
-      - ${COMPOSE_PROJECT_NAME}_config:/etc/ckan
-      - ${COMPOSE_PROJECT_NAME}_home:/usr/lib/ckan
-      - ${COMPOSE_PROJECT_NAME}_storage:/var/lib/ckan
+      - config:/etc/ckan
+      - home:/usr/lib/ckan
+      - storage:/var/lib/ckan
 
   ckan-datapusher:
     container_name: ${COMPOSE_PROJECT_NAME}-datapusher
@@ -60,7 +60,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     restart: always
     volumes:
-      - ${COMPOSE_PROJECT_NAME}_pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
 
   ckan-solr:
     container_name: ${COMPOSE_PROJECT_NAME}-solr
@@ -75,10 +75,14 @@ services:
     restart: always
     
 volumes:
-  ${COMPOSE_PROJECT_NAME}_config:
-  ${COMPOSE_PROJECT_NAME}_home:
-  ${COMPOSE_PROJECT_NAME}_storage:
-  ${COMPOSE_PROJECT_NAME}_pg-data:
+  config:
+    name: ${COMPOSE_PROJECT_NAME}_config
+  home:    
+    name: ${COMPOSE_PROJECT_NAME}_home
+  storage:
+    name: ${COMPOSE_PROJECT_NAME}_storage
+  pg-data:
+    name: ${COMPOSE_PROJECT_NAME}_pg-data
     
 networks:
   default:
