@@ -46,7 +46,7 @@ services:
       - "8800:8800"
     
   ckan-db:
-    container_name: ${COMPOSE_PROJECT_NAME}-db
+    container_name: ${COMPOSE_PROJECT_NAME}-postgis
     build:
       context: ../../
       dockerfile: contrib/docker/postgresql/Dockerfile
