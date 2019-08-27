@@ -4,6 +4,8 @@ version: "3.6"
 
 services:
   ckan:
+    depends_on:
+      - ckan-db
     container_name: ${COMPOSE_PROJECT_NAME}-ckan
     build:
       context: ../../
@@ -47,6 +49,10 @@ services:
     
   ckan-db:
     container_name: ${COMPOSE_PROJECT_NAME}-postgis
+    networks:
+           default:
+                aliases:
+                    - db
     build:
       context: ../../
       dockerfile: contrib/docker/postgresql/Dockerfile
@@ -59,6 +65,8 @@ services:
     environment:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+        test: ["CMD", "pg_isready", "-U", "postgres"]
     restart: always
     volumes:
       - pg-data:/var/lib/postgresql/data
@@ -68,6 +76,8 @@ services:
     build:
       context: ../../
       dockerfile: contrib/docker/solr/Dockerfile
+    volumes:
+      - solr_data:/opt/solr/server/solr/ckan/data
     restart: always
 
   ckan-redis:
@@ -84,6 +94,8 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME}_storage
   pg-data:
     name: ${COMPOSE_PROJECT_NAME}_pg-data
+  solr_data:
+    name: ${COMPOSE_PROJECT_NAME}_solr_data
     
 networks:
   default:
